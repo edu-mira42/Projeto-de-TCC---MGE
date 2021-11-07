@@ -13,7 +13,7 @@ Todos os arquivos do projeto estão disponibilizados neste repositório, dividid
    - BIBLIOTECAS UTILIZADAS
 
 As bibliotecas EmonLib, ESPAsyncWebServer, AsyncTCP, AsyncElegantOTA e CredentialsManager precisam ser instaladas separadamente. As demais já estão inclusas com o Arduino IDE ou são instaladas ao adicionar o Gerenciador de Placas do ESP32.
-A biblioteca "CredentialsManager foi desenvolvida pelos próprios autores do projeto, portanto, está disponível neste repoitório, na pasta "BIBLIOTECA DEV".
+A biblioteca "CredentialsManager foi desenvolvida pelos próprios autores do projeto, portanto, está disponível neste repositório, na pasta "CredentialsManager".
 
 Links de instalação das bibliotecas:
 - EmonLib: <https://github.com/openenergymonitor/EmonLib>
