@@ -1,0 +1,29 @@
+# -----------------------------------------------
+# syntax couloring for CredentialsManager library
+# -----------------------------------------------
+
+
+#Datatypes (such as objects)
+
+CredentialsManager KEYWORD1
+
+#Methods / functions
+
+begin KEYWORD2
+configWebPages KEYWORD2
+getSSID KEYWORD2
+getPASS KEYWORD2
+getSSIDAP KEYWORD2
+getPASSAP KEYWORD2
+getUserHTTP KEYWORD2
+getPassHTTP KEYWORD2
+getOPmode KEYWORD2
+getAPmode KEYWORD2
+saveSSID KEYWORD2
+savePASS KEYWORD2
+saveSSIDAP KEYWORD2
+savePASSAP KEYWORD2
+saveUserHTTP KEYWORD2
+savePassHTTP KEYWORD2
+saveOPmode KEYWORD2
+saveAPmode KEYWORD2
