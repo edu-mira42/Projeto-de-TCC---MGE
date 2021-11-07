@@ -7,6 +7,8 @@ Todos os arquivos do projeto estão disponibilizados neste repositório, dividid
 
 - DATA -> Todos os arquivos que devem ser intalados na memória flash do microcontrolador, que consistem na programação em HTML/CSS/JavaScript e imagens/documentos de configuração.
 
+- BIBLIOTECA DEV -> Biblioteca desenvolvida exclusivamente para este projeto, deve ser instalada na pasta "libraries" que é localizada dentro da pasta "C:\\USER\DOCUMENTS\ARDUINO\LIBRARIES" (no Windows). As demais bibliotecas, por questões de direitos de uso, estão listadas abaixo, porém, não estarão disponíveis para download neste repositório.
+
 Para o "upload" dos arquivos contidos na pasta DATA, é necessário instalar no Arduino IDE a ferramenta "esptool.py", que está disponível a partir do link <https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/> e deve ser instalada na pasta "tools", que está localizada dentro da pasta de instalação do Arduino IDE.
 
 
