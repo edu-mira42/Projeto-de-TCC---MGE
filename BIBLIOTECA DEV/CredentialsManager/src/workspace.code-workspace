@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "WifiAndHTTPmanager",
+			"path": ".."
+		},
+		{
+			"name": "TestLibrary",
+			"path": "..\\..\\TestLibrary"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"string": "cpp"
+		}
+	}
+}
