@@ -5,9 +5,9 @@ Todos os arquivos do projeto estão disponibilizados neste repositório, dividid
 
 - SRC -> "Source Code", o código em C++ no formato ".ino" utilizado através do Arduino IDE. Para o uso do software em questão com o microcontrolador utilizado, o ESP32, é necessário instalar o gerenciador de placas "Espressif IDF", disponpivel em: <https://dl.espressif.com/dl/package_esp32_index.json>. (É necessário colar o link na gua de preferências do Arduino IDE e intalar o Gerenciador de placas na aba dedicada).
 
-- DATA -> Todos os arquivos que devem ser intalados na memória flash do microcontrolador, que consistem na programação em HTML/CSS/JavaScript e imagens/documentos de configuração.
+- data -> Todos os arquivos que devem ser intalados na memória flash do microcontrolador, que consistem na programação em HTML/CSS/JavaScript e imagens/documentos de configuração.
 
-- BIBLIOTECA DEV -> Biblioteca desenvolvida exclusivamente para este projeto, deve ser instalada na pasta "libraries" que é localizada dentro da pasta "C:\\USER\DOCUMENTS\ARDUINO\LIBRARIES" (no Windows). As demais bibliotecas, por questões de direitos de uso, estão listadas abaixo, porém, não estarão disponíveis para download neste repositório.
+- CrendentialsManager -> Biblioteca desenvolvida exclusivamente para este projeto, deve ser instalada na pasta "libraries" que é localizada dentro da pasta "C:\\USER\DOCUMENTS\ARDUINO\LIBRARIES" (no Windows). As demais bibliotecas, por questões de direitos de uso, estão listadas abaixo, porém, não estarão disponíveis para download neste repositório.
 
 
    - BIBLIOTECAS UTILIZADAS
