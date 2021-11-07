@@ -30,4 +30,4 @@ Para o "upload" dos arquivos contidos na pasta DATA, é necessário instalar no 
 
 Tutorial de como instalar o Gerenciador de Placas para o ESP32 (Blog UsinaInfo): <https://www.usinainfo.com.br/blog/programar-esp32-com-a-ide-arduino-tutorial-completo/>
 
-Tutorial de como instalar a ferramenta "esptool.py" (Blog Embarcados): <https://www.embarcados.com.br/spiffs-o-sistema-de-arquivos-do-esp8266-32/>
+Tutorial de como instalar a ferramenta "esptool.py" (Efeito Nerd): <http://www.efeitonerd.com.br/2021/06/gravar-arquivos-no-esp32-spiffs.html>
