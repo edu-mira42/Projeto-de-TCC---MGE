@@ -9,6 +9,22 @@ Todos os arquivos do projeto estão disponibilizados neste repositório, dividid
 
 - BIBLIOTECA DEV -> Biblioteca desenvolvida exclusivamente para este projeto, deve ser instalada na pasta "libraries" que é localizada dentro da pasta "C:\\USER\DOCUMENTS\ARDUINO\LIBRARIES" (no Windows). As demais bibliotecas, por questões de direitos de uso, estão listadas abaixo, porém, não estarão disponíveis para download neste repositório.
 
+
+   - BIBLIOTECAS UTILIZADAS
+
+As bibliotecas EmonLib, ESPAsyncWebServer, AsyncTCP, AsyncElegantOTA e CredentialsManager precisam ser instaladas separadamente. As demais já estão inclusas com o Arduino IDE ou são instaladas ao adicionar o Gerenciador de Placas do ESP32.
+A biblioteca "CredentialsManager foi desenvolvida pelos próprios autores do projeto, portanto, está disponível neste repoitório, na pasta "BIBLIOTECA DEV".
+
+Links de instalação das bibliotecas:
+- EmonLib: <https://github.com/openenergymonitor/EmonLib>
+- ESPAsyncWebServer: <https://github.com/me-no-dev/ESPAsyncWebServer>
+- AsyncTCP: <https://github.com/me-no-dev/AsyncTCP>
+- AsyncElegantOTA: <https://github.com/ayushsharma82/AsyncElegantOTA>
+
+
+    - GERENCIADOR DE PLACAS E ENVIO DOS ARQUIVOS PARA A MEMÓRIA
+
+
 Para o "upload" dos arquivos contidos na pasta DATA, é necessário instalar no Arduino IDE a ferramenta "esptool.py", que está disponível a partir do link <https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/> e deve ser instalada na pasta "tools", que está localizada dentro da pasta de instalação do Arduino IDE.
 
 
