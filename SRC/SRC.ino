@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
+#include <SD.h>
 #include <Wire.h>
 #include <LiquidCrystal.h>
 #include <AsyncTCP.h>
@@ -96,7 +97,7 @@ const char* PARAM_INPUT_7 = "input7";
 const char* PARAM_INPUT_8 = "input8";
 
 #define ADC_INPUT 34                   // Define o terminal em que o sensor esta conectado
-#define ADC_BITS    10                 // Define a resolucao em bits
+#define ADC_BITS    12                 // Define a resolucao em bits
 #define ADC_COUNTS  (1<<ADC_BITS)
 
 
@@ -158,7 +159,8 @@ void setup() {
   adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11); // Cofigura a atenuação de ruido do canal 6 e 5 em 11dB (canal 6 corresponde ao canal do terminal 35, 34 e 33)
   adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11);
   adc1_config_channel_atten(ADC1_CHANNEL_5, ADC_ATTEN_DB_11);
-  analogReadResolution(10);                                   // Configura a resolução analógica para 10 bits (Necessário para a bibloteca EmonLib)
+  analogReadResolution(ADC_BITS);
+  //analogReadResolution(10);                                   // Configura a resolução analógica para 10 bits (Necessário para a bibloteca EmonLib)
   
   pinMode(modeSelect, INPUT);                                 // Define o terminal do botão como entrada
   
@@ -167,11 +169,10 @@ void setup() {
   getWifi();                                                  // Inicia o Wi-Fi
   
   genData();                                                  // Informações gerais armazenadas na memória flash
-  sensorOP = 3; //remover depois
   if(sensorOP == 1){
     CT013.current(34, calibration);                             // Corrente: Terminal de entrada, calibração
     CT013_2.current(33, calibration);                           // Corrente: Terminal de entrada, calibração
-    ZMPT.voltage(35, 106.8, 1.7);                                // Tensão: Termnial de entrada, fator de calibração, phase shift (Defasagem em relação a medição e o observado pelo microcontrolador)
+    ZMPT.voltage(35, 350, 1.1);                                // Tensão: Termnial de entrada, fator de calibração, phase shift (Defasagem em relação a medição e o observado pelo microcontrolador)
   }
   else if(sensorOP == 2){
     CT013.current(34, calibration);                             // Corrente: Terminal de entrada, calibração
@@ -202,13 +203,13 @@ void setup() {
 
 void loop() {
   if(sensorOP == 1){
-    ZMPT.calcVI(20, 1200);
+    ZMPT.calcVI(12, 500);
     Irms = CT013.calcIrms(1200);
     Irms1 = CT013_2.calcIrms(1200);  // Calcula a corrente RMS (prv 1200)
     Vrms = ZMPT.Vrms;
   }
   else if(sensorOP == 2){
-    ZMPT.calcVI(20, 1200);
+    ZMPT.calcVI(12, 1000);
     Irms = CT013.calcIrms(1200);
     Vrms = ZMPT.Vrms;
   }
@@ -245,14 +246,15 @@ void loop() {
     }
   }
   if(restart == 2){                         // Limpa o relatório simples
-    cmg.writeFile("/cons.txt", "");
-    cmg.writeFile("/consCSV.txt", "");
+    cmg.writeFileSD("/cons.txt", "");
+    cmg.writeFileSD("/consCSV.csv", "");
     cmg.writeFile("/writeCicle.txt", "0");
     restart = 0;
   }
   if(restart == 3){                         // Limpa o relatório CSV
-    cmg.writeFile("/cons.txt", "");
-    cmg.writeFile("/consCSV.txt", "");
+    cmg.writeFileSD("/cons.txt", "");
+    cmg.writeFileSD("/consCSV.csv", "");
+    cmg.writeFile("/writeCicle.txt", "0");
     conskw = 0;
     restart = 0;
   }
@@ -520,11 +522,11 @@ void configWebPages(void) {
   });
 
   server.on("/cons.txt", HTTP_GET, [](AsyncWebServerRequest * request) {
-    request->send(SPIFFS, "/cons.txt");
+    request->send(SD, "/cons.txt");
   });
 
-  server.on("/consCSV.txt", HTTP_GET, [](AsyncWebServerRequest * request) {
-    request->send(SPIFFS, "/consCSV.txt");
+  server.on("/consCSV.csv", HTTP_GET, [](AsyncWebServerRequest * request) {
+    request->send(SD, "/consCSV.csv");
   });
 
   server.on("/bootstrap.min.js", HTTP_GET, [](AsyncWebServerRequest * request) {
@@ -735,6 +737,8 @@ void getWifi(void) {
       delay(500);
       Serial.print(".");
       if (millis() - now > WifiAttempt) {
+        cmg.saveOPmode(0);
+        cmg.saveAPmode(0);
         ESP.restart();
       }
     }
@@ -877,8 +881,8 @@ String timeStamp(){
 
 void relatorio(){
   //int NT = ((60000/intervalo)*1440)*D; // NT = Número total de registros; D = dias de registro
-  int NT = 1000;
-  intervalo = 30000;
+  int NT = 10000;
+  intervalo = 5000;
 
   if(millis() - storeCons >= intervalo){
     cmg.writeFile("/consumo.txt", String(conskw).c_str());
@@ -904,7 +908,7 @@ void relatorio(){
 
       //Relatório CSV
       if(writeCicle == 0){
-        relatorioCSV = "data/hora,tensao(V),correnteF1(A),correnteF2(A),potencia(W),consumo(kWh)\n";
+        relatorioCSV = "\ndata/hora,tensao(V),correnteF1(A),correnteF2(A),potencia(W),consumo(kWh)\n";
         relatorioCSV += String(timeStamp());
       }else{
         relatorioCSV = String(timeStamp());
@@ -920,8 +924,8 @@ void relatorio(){
       relatorioCSV += ",";
       relatorioCSV += String(conskw);
 
-      cmg.appendFile("/cons.txt", String(relatorio).c_str());
-      cmg.appendFile("/consCSV.txt", String(relatorioCSV).c_str());
+      cmg.appendFileSD("/cons.txt", String(relatorio).c_str());
+      cmg.appendFileSD("/consCSV.csv", String(relatorioCSV).c_str());
       cmg.writeFile("/writeCicle.txt", String(writeCicle).c_str());
       writeCicle++;
     }
