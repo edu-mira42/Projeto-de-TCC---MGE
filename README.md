@@ -9,6 +9,8 @@ Todos os arquivos do projeto estão disponibilizados neste repositório, dividid
 
 - CrendentialsManager -> Biblioteca desenvolvida exclusivamente para este projeto, deve ser instalada na pasta "libraries" que é localizada dentro da pasta "C:\\USER\DOCUMENTS\ARDUINO\LIBRARIES" (no Windows). As demais bibliotecas, por questões de direitos de uso, estão listadas abaixo, porém, não estarão disponíveis para download neste repositório.
 
+- Design da PCI -> Arquivo para Proteus (Versão 8.11 ou superior) com o esquema eltrônico e design da PCI do projeto.
+
 
    - BIBLIOTECAS UTILIZADAS
 
