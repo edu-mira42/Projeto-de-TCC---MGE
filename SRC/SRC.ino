@@ -758,8 +758,8 @@ void configWebPages(void) {
 
     //GUARDA AS CREDENCIAIS PARA LOGIN HTTP
     if (USER.length() > 0 && PASSW.length() > 0) {
-      cmg.saveUserHTTP(USER.c_str());
-      cmg.savePassHTTP(PASSW.c_str());
+      cmg.writeFile("/intervalo.txt", USER.c_str());
+      cmg.writeFile("periodo.txt", PASSW.c_str());
       request->send(SD, "/configAnswerPage.html");
     }
 
@@ -951,9 +951,12 @@ String timeStamp(){
 }
 
 void relatorio(){
-  //int NT = ((60000/intervalo)*1440)*D; // NT = Número total de registros; D = dias de registro
-  int NT = 10000;
-  intervalo = 5000;
+  if(intervalo == 0){
+    intervalo = 5;
+  }
+  int NT = (86400/intervalo)*D; // NT = Número total de registros; D = dias de registro
+  // int NT = 10000;
+  // intervalo = 5000;
 
   if(millis() - storeCons >= intervalo){
     cmg.writeFile("/consumo.txt", String(conskw).c_str());
