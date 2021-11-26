@@ -129,7 +129,7 @@ String getVoltage() {
 
 String getCurrent() {
   float current = Irms;
-  if (current <= 0.2) {
+  if (current <= 0.26) {
     current = 0;
   }
   return String(current);
@@ -137,7 +137,7 @@ String getCurrent() {
 
 String getCurrent1() {
   float current1 = Irms1;
-  if (current1 <= 0.2) {
+  if (current1 <= 0.26) {
     current1 = 0;
   }
   return String(current1);
@@ -279,6 +279,7 @@ void Task2code( void * pvParameters ){                // TAREFA DO NÚCLEO 2
       if(sd == 0 || pressTime >= 20000){
         if(pressTime <= 9000){
           sd = 1;
+          millisNow = 0;
           page++;
         }
         else if(pressTime >= 20000){
@@ -441,7 +442,6 @@ void initWebSocket(void) {
 }
 
 String processor(const String& var) {
-  //Serial.println(var);
   if (var == "VOLTAGE") {
     return getVoltage();
   }
@@ -869,14 +869,14 @@ void showIP() {
   if(opMode == 1){
     lcd.clear();
     lcd.setCursor(4, 1);
-    lcd.print("IP do ESP32:");
+    lcd.print("IP do M.G.E:");
     lcd.setCursor(4, 2);
     lcd.print(WiFi.localIP());
   }
   if(opMode == 0){
     lcd.clear();
     lcd.setCursor(4, 1);
-    lcd.print("IP do ESP32:");
+    lcd.print("IP do M.G.E:");
     lcd.setCursor(4, 2);
     lcd.print(WiFi.softAPIP());
   }
@@ -907,7 +907,8 @@ void nextPage(){
     }else if (page == 3){
       printLocalTime();
     }else if (page == 4){
-      parameters();
+      //parameters();
+      page = 0;
     }
     else{
       page = 0;                           // Retorna a página 0
@@ -1013,7 +1014,7 @@ void coreDefinition(void){
                     NULL,        /* Parâmetro da tarefa */
                     10,           /* Prioridade da tarefa */
                     &Task1,      /* Identificação para acompanhar a progresso da tarefa */
-                    0);          /* Configura a tarefa para o núcleo 0 */                  
+                    1);          /* Configura a tarefa para o núcleo 0 */                  
   delay(500); 
 
   //Cria uma tarefa que vai ser executada na função Task1code(), com prioridade 1 e executada no núcleo 1
@@ -1022,8 +1023,8 @@ void coreDefinition(void){
                     "Task2",     /* Nome da tarefa. */
                     10000,       /* Tamanho do pacote da tarefa */
                     NULL,        /* Parâmetro da tarefa */
-                    1,           /* Prioridade da tarefa */
+                    10,           /* Prioridade da tarefa */
                     &Task2,      /* Identificação para acompanhar a progresso da tarefa */
-                    1);          /* Configura a tarefa para o núcleo 1 */
+                    0);          /* Configura a tarefa para o núcleo 1 */
   delay(500); 
 }
