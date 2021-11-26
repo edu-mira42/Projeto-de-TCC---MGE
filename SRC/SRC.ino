@@ -8,7 +8,7 @@
 #include <Wire.h>
 #include <LiquidCrystal.h>
 #include <AsyncTCP.h>
-//#include <AsyncElegantOTA.h>
+#include <AsyncElegantOTA.h>
 #include <WiFiAP.h>
 #include "time.h"
 
@@ -161,22 +161,22 @@ String getConsumption() {
 
 void setup() {
   Serial.begin(115200);
-  cmg.begin();                                                // Inicia a biblioteca que salva as informações na memória flash
-  lcd.begin(20, 4);                                           // Inicia o display LCD 20x4
+  cmg.begin();                                                  // Inicia a biblioteca que salva as informações na memória flash
+  lcd.begin(20, 4);                                             // Inicia o display LCD 20x4
   
-  adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11); // Cofigura a atenuação de ruido do canal 6 e 5 em 11dB (canal 6 corresponde ao canal do terminal 35, 34 e 33)
+  adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11);   // Cofigura a atenuação de ruido do canal 6 e 5 em 11dB (canal 6 corresponde ao canal do terminal 35, 34 e 33)
   adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11);
   adc1_config_channel_atten(ADC1_CHANNEL_5, ADC_ATTEN_DB_11);
   analogReadResolution(ADC_BITS);
   //analogReadResolution(10);                                   // Configura a resolução analógica para 10 bits (Necessário para a bibloteca EmonLib)
   
-  pinMode(modeSelect, INPUT);                                 // Define o terminal do botão como entrada
+  pinMode(modeSelect, INPUT);                                   // Define o terminal do botão como entrada
   
-  getOPmode();                                                // Define o modo de operação
-  configWebPages();                                           // Configura todas as páginas a serem exibidas no navegador
-  getWifi();                                                  // Inicia o Wi-Fi
+  getOPmode();                                                  // Define o modo de operação
+  configWebPages();                                             // Configura todas as páginas a serem exibidas no navegador
+  getWifi();                                                    // Inicia o Wi-Fi
   
-  genData();                                                  // Informações gerais armazenadas na memória flash
+  genData();                                                    // Informações gerais armazenadas na memória flash
   if(sensorOP == 1){
     CT013.current(34, calibration);                             // Corrente: Terminal de entrada, calibração
     CT013_2.current(33, calibration);                           // Corrente: Terminal de entrada, calibração
@@ -200,7 +200,7 @@ void setup() {
   }
   
   server.begin();                                             // Inicia a comunicação de servidor via Wifi
-  //AsyncElegantOTA.begin(&server);                             // Inicia o WebServer assíncrono
+  AsyncElegantOTA.begin(&server);                             // Inicia o WebServer assíncrono
   showIP();                                                   // Mostra o IP do microcontrolador no display LCD
   coreDefinition();
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);   // Configura a hora e data
@@ -216,43 +216,40 @@ void Task1code( void * pvParameters ){                  // TAREFA DO NÚCLEO 1
   Serial.println(xPortGetCoreID());
   
   for(;;){
-    if(opMode == 1){
-      if(sensorOP == 1){
-      ZMPT.calcVI(12, 500);
+    if(sensorOP == 1){
+    ZMPT.calcVI(12, 500);
+    Irms = CT013.calcIrms(1200);
+    Irms1 = CT013_2.calcIrms(1200);  // Calcula a corrente RMS (prv 1200)
+    Vrms = ZMPT.Vrms;
+    }
+    else if(sensorOP == 2){
+      ZMPT.calcVI(12, 1000);
+      Irms = CT013.calcIrms(1200);
+      Vrms = ZMPT.Vrms;
+    }
+    else if(sensorOP == 3){
       Irms = CT013.calcIrms(1200);
       Irms1 = CT013_2.calcIrms(1200);  // Calcula a corrente RMS (prv 1200)
-      Vrms = ZMPT.Vrms;
-      }
-      else if(sensorOP == 2){
-        ZMPT.calcVI(12, 1000);
-        Irms = CT013.calcIrms(1200);
-        Vrms = ZMPT.Vrms;
-      }
-      else if(sensorOP == 3){
-        Irms = CT013.calcIrms(1200);
-        Irms1 = CT013_2.calcIrms(1200);  // Calcula a corrente RMS (prv 1200)
-      }
-      else if(sensorOP == 4){
-        Irms = CT013.calcIrms(1200);
-      }
-    
-      if (Irms <= 0.2) {
-        Irms = 0;
-      }
-      if (Irms1 <= 0.2 && (sensorOP == 1 || sensorOP == 3)) {
-        Irms1 = 0;
-      }
-      IrmsTotal = Irms + Irms1;
-      Prms = (IrmsTotal) * (Vrms);
-      String t = String(millis() - previousTime);               // Calcula o tempo que se passou entre o último cálculo e o atual
-      previousTime = millis();                                  // Variável que armazena o momento do último cálculo
-      lastConskw = conskw;
-      conskw = lastConskw + ((Prms) / 1000) * (t.toFloat() / 1000 / 3600); // Soma o valor do último cálculo de consumo e o consumo atual em kWh (tempo gasto desde o último cálculo X potência
-      
-      relatorio(); // Gera o relatório
-      //serialOut(); // Envia as informações para a porta serial
     }
-    else{delay(20);}
+    else if(sensorOP == 4){
+      Irms = CT013.calcIrms(1200);
+    }
+  
+    if (Irms <= 0.26) {
+      Irms = 0;
+    }
+    if (Irms1 <= 0.26 && (sensorOP == 1 || sensorOP == 3)) {
+      Irms1 = 0;
+    }
+    IrmsTotal = Irms + Irms1;
+    Prms = (IrmsTotal) * (Vrms);
+    String t = String(millis() - previousTime);               // Calcula o tempo que se passou entre o último cálculo e o atual
+    previousTime = millis();                                  // Variável que armazena o momento do último cálculo
+    lastConskw = conskw;
+    conskw = lastConskw + ((Prms) / 1000) * (t.toFloat() / 1000 / 3600); // Soma o valor do último cálculo de consumo e o consumo atual em kWh (tempo gasto desde o último cálculo X potência
+    
+    relatorio(); // Gera o relatório
+    //serialOut(); // Envia as informações para a porta serial
     delay(20);
   }
 }
@@ -900,20 +897,25 @@ void nextPage(){
   if (millis() - millisNow >= 500) {
     if(page == 0){                        // Página 0 - Leituras dos sensores
       printDisplay();
+      millisNow = millis();
     }else if(page == 1){
       printCorrente();
+      millisNow = millis();
     }else if(page == 2){                  // Página 1 - Mostra o IP do microcontrolador
       showIP();
+      millisNow = millis();
     }else if (page == 3){
       printLocalTime();
+      millisNow = millis();
     }else if (page == 4){
       //parameters();
+      millisNow = 0;
       page = 0;
     }
     else{
+      millisNow = 0;
       page = 0;                           // Retorna a página 0
     }
-    millisNow = millis();
   }
 }
 
