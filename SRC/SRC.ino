@@ -59,7 +59,12 @@ int intervalo = 0;
 int NT = 0;
 int D = 0;
 
-int page = 0;
+int seg = 0;
+int minuto = 0;
+int hr = 0;
+int segRL = 0;
+
+int page = 4;
 
 unsigned long previousTime;
 
@@ -243,7 +248,7 @@ void Task1code( void * pvParameters ){                  // TAREFA DO NÚCLEO 1
       Irms1 = 0;
     }
     IrmsTotal = Irms + Irms1;
-    Prms = (IrmsTotal) * (Vrms);
+    Prms = ((IrmsTotal) * (Vrms)) * 0.92;                     // 0.92 é o fator de potência da rede elétrica
     String t = String(millis() - previousTime);               // Calcula o tempo que se passou entre o último cálculo e o atual
     previousTime = millis();                                  // Variável que armazena o momento do último cálculo
     lastConskw = conskw;
@@ -260,59 +265,57 @@ void Task2code( void * pvParameters ){                // TAREFA DO NÚCLEO 2
   Serial.println(xPortGetCoreID());
   
   for(;;){
-    if(opMode == 1){
-      buttonState = digitalRead(modeSelect);
-      if(buttonState == 1 && releaseB == 0){
-        count = millis();
-        releaseB = 1;
+    buttonState = digitalRead(modeSelect);
+    if(buttonState == 1 && releaseB == 0){
+      count = millis();
+      releaseB = 1;
+    }
+    else if(buttonState == 0 && releaseB == 1){
+      pressTime = millis() - count;
+      releaseB = 0;
+      sd = 0;
+    }
+    if(releaseB == 1){
+      pressTime = millis() - count;
+    }
+    if(sd == 0 || pressTime >= 20000){
+      if(pressTime <= 9000){
+        sd = 1;
+        millisNow = 0;
+        page++;
       }
-      else if(buttonState == 0 && releaseB == 1){
-        pressTime = millis() - count;
-        releaseB = 0;
-        sd = 0;
+      else if(pressTime >= 20000){
+        lcd.clear();
+        lcd.setCursor(5,1);
+        lcd.print("REINICIANDO");
+        lcd.setCursor(7,2);
+        lcd.print("SISTEMA");
+        delay(1000);
+        sd = 1;
+        restart = 1;
+        cmg.saveAPmode(0);
+        cmg.saveOPmode(0);
       }
-      if(releaseB == 1){
-        pressTime = millis() - count;
+    }
+    if(restart == 1){                       // Reinicia o microcontrolador
+      if(millis() - restartClock >= 4000){
+        ESP.restart();
       }
-      if(sd == 0 || pressTime >= 20000){
-        if(pressTime <= 9000){
-          sd = 1;
-          millisNow = 0;
-          page++;
-        }
-        else if(pressTime >= 20000){
-          lcd.clear();
-          lcd.setCursor(5,1);
-          lcd.print("REINICIANDO");
-          lcd.setCursor(7,2);
-          lcd.print("SISTEMA");
-          delay(1000);
-          sd = 1;
-          restart = 1;
-          cmg.saveAPmode(0);
-          cmg.saveOPmode(0);
-        }
-      }
-      if(restart == 1){                       // Reinicia o microcontrolador
-        if(millis() - restartClock >= 4000){
-          ESP.restart();
-        }
-      }
-      if(restart == 2){                         // Limpa o relatório simples
-        cmg.writeFileSD("/cons.txt", "");
-        cmg.writeFileSD("/consCSV.csv", "");
-        cmg.writeFile("/writeCicle.txt", "0");
-        restart = 0;
-      }
-      if(restart == 3){                         // Limpa o relatório CSV
-        cmg.writeFileSD("/cons.txt", "");
-        cmg.writeFileSD("/consCSV.csv", "");
-        cmg.writeFile("/writeCicle.txt", "0");
-        conskw = 0;
-        restart = 0;
-      }
-      nextPage();  // Controla as "páginas" do display
-    }else{delay(20);}
+    }
+    if(restart == 2){                         // Limpa o relatório simples
+      cmg.writeFileSD("/cons.txt", "");
+      cmg.writeFileSD("/consCSV.csv", "");
+      cmg.writeFile("/writeCicle.txt", "0");
+      restart = 0;
+    }
+    if(restart == 3){                         // Limpa o relatório CSV
+      cmg.writeFileSD("/cons.txt", "");
+      cmg.writeFileSD("/consCSV.csv", "");
+      cmg.writeFile("/writeCicle.txt", "0");
+      conskw = 0;
+      restart = 0;
+    }
+    nextPage();  // Controla as "páginas" do display
     //AsyncElegantOTA.loop();
     ws.cleanupClients();
     reconnect_wifi();
@@ -825,6 +828,10 @@ void getWifi(void) {
   }
 
   else if (cmg.getOPmode() == 0) {
+    lcd.setCursor(4,1);
+    lcd.print("INICIANDO EM");
+    lcd.setCursor(7,2);
+    lcd.print("MODO AP");
     WiFi.mode(WIFI_AP_STA);
     String SSIDs;
     int n = WiFi.scanNetworks();
@@ -960,11 +967,32 @@ void printLocalTime(){
     return;
   }
   /*Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");*/
-  lcd.clear();
-  lcd.setCursor(5,1);
-  lcd.print(&timeinfo, "%d/%m/%Y"); // dia, mês e ano
-  lcd.setCursor(6,2);
-  lcd.print(&timeinfo, "%H:%M:%S"); // Hora, minuto e segundo
+  if(opMode == 1){
+    lcd.clear();
+    lcd.setCursor(5,1);
+    lcd.print(&timeinfo, "%d/%m/%Y"); // dia, mês e ano
+    lcd.setCursor(6,2);
+    lcd.print(&timeinfo, "%H:%M:%S"); // Hora, minuto e segundo
+  }
+  else{
+    segRL = (millis() - seg)/1000;
+    if(segRL >= 60){
+      seg = millis();
+      segRL = 0;
+      minuto++;
+    }
+    if(minuto >= 60){
+      minuto = 0;
+      hr++;
+    }
+    lcd.clear();
+    lcd.setCursor(2,0);
+    lcd.print("MEDIDOR OFFLINE");
+    lcd.setCursor(0,1);
+    lcd.print("TEMPO DE ATIVIDADE:");
+    lcd.setCursor(6,2);
+    lcd.print(String(hr)+":"+String(minuto)+":"+String(segRL));
+  }
 }
 
 String timeStamp(){
