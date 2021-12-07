@@ -207,7 +207,6 @@ void setup() {
   
   server.begin();                                             // Inicia a comunicação de servidor via Wifi
   AsyncElegantOTA.begin(&server);                             // Inicia o WebServer assíncrono
-  showIP();                                                   // Mostra o IP do microcontrolador no display LCD
   coreDefinition();
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);   // Configura a hora e data
 }
@@ -792,10 +791,8 @@ void configWebPages(void) {
 void getWifi(void) {
   if (cmg.getOPmode() == 1) {
     lcd.clear();
-    lcd.setCursor(4, 1);
-    lcd.print("Conectando a");
-    lcd.setCursor(2, 2);
-    lcd.print(cmg.getSSID());
+    printCenter("Conectando a:", 1);
+    printCenter(cmg.getSSID(), 2);
 
     Serial.println();
     Serial.println();
@@ -820,18 +817,15 @@ void getWifi(void) {
     Serial.println("IP address: ");
     Serial.println(WiFi.localIP());
     lcd.clear();
-    lcd.setCursor(5, 1);
-    lcd.print("Conectado!");
-    lcd.setCursor(2, 2);
-    lcd.print("IP: ");
-    lcd.print(WiFi.localIP());
+    printCenter("Conectado!", 1);
+    String endIP = String(WiFi.localIP().toString().c_str());
+    printCenter("IP:" + endIP, 2);
   }
 
   else if (cmg.getOPmode() == 0) {
-    lcd.setCursor(4,1);
-    lcd.print("INICIANDO EM");
-    lcd.setCursor(7,2);
-    lcd.print("MODO AP");
+    lcd.clear();
+    printCenter("INCIANDO EM", 1);
+    printCenter("MODO AP", 2);
     WiFi.mode(WIFI_AP_STA);
     String SSIDs;
     int n = WiFi.scanNetworks();
@@ -861,12 +855,16 @@ void getWifi(void) {
     cmg.writeFileSD("/ssidList.json", SSIDs.c_str());
     }
     if (cmg.getAPmode() == 0) {
-      WiFi.softAP("ESP32", "");
+      WiFi.softAP("MGE", "");
     }
     else if (cmg.getAPmode() == 1) {
       WiFi.softAP(cmg.getSSIDAP(), cmg.getPASSAP());
     }
     IPAddress myIP = WiFi.softAPIP();
+    lcd.clear();
+    printCenter("Iniciado!", 1);
+    String endIPAP = String(WiFi.softAPIP().toString().c_str());
+    printCenter("IP:" + endIPAP, 2);
     Serial.print("AP IP address: ");
     Serial.println(myIP);
     Serial.println("Server started");
@@ -1009,6 +1007,12 @@ String timeStamp(){
   else if(opMode == 0){
     return(String(millis()));
   }
+}
+
+void printCenter(String text, int line){ // Envia o texto centralizado para o dislay LCD
+  int offSet = (20-(text.length()))/2;
+  lcd.setCursor(offSet, line);
+  lcd.print(text);
 }
 
 void relatorio(){
