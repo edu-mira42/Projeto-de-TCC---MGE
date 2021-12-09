@@ -240,10 +240,10 @@ void Task1code( void * pvParameters ){                  // TAREFA DO NÚCLEO 1
       Irms = CT013.calcIrms(1200);
     }
   
-    if (Irms <= 0.26) {
+    if (Irms <= 0.32) {
       Irms = 0;
     }
-    if (Irms1 <= 0.26 && (sensorOP == 1 || sensorOP == 3)) {
+    if (Irms1 <= 0.32 && (sensorOP == 1 || sensorOP == 3)) {
       Irms1 = 0;
     }
     IrmsTotal = Irms + Irms1;
@@ -585,7 +585,8 @@ void configWebPages(void) {
 
   /*-------------------------- RECURSOS HTML --------------------------*/
   server.on("/bootstrap.min.css", HTTP_GET, [](AsyncWebServerRequest * request) {
-    request->send(SD, "/bootstrap.min.css");
+    File file101 = SD.open("/bootstrap.min.css");
+    request->send(file101, "/bootstrap.min.css");
   });
 
   server.on("/cons.txt", HTTP_GET, [](AsyncWebServerRequest * request) {
@@ -597,7 +598,8 @@ void configWebPages(void) {
   });
 
   server.on("/bootstrap.min.js", HTTP_GET, [](AsyncWebServerRequest * request) {
-    request->send(SD, "/bootstrap.min.js");
+    File file102 = SD.open("/bootstrap.min.js");
+    request->send(file102, "/bootstrap.min.js");
   });
 
   server.on("/Footer-Basic.css", HTTP_GET, [](AsyncWebServerRequest * request) {
@@ -621,11 +623,18 @@ void configWebPages(void) {
   });
 
   server.on("/img1.webp", HTTP_GET, [](AsyncWebServerRequest * request) {
-    request->send(SD, "/img1.webp");
+    File file103 = SD.open("/img1.webp");
+    request->send(file103, "/img1.webp");
   });
 
   server.on("/img2.jpeg", HTTP_GET, [](AsyncWebServerRequest * request) {
-    request->send(SD, "/img2.jpeg");
+    File file104 = SD.open("/img2.jpeg");
+    request->send(file104, "/img2.jpeg");
+  });
+
+  server.on("/exporting.js", HTTP_GET, [](AsyncWebServerRequest * request) {
+    File file105 = SD.open("/exporting.js");
+    request->send(file105, "/exporting.js");
   });
 
   server.on("/highcharts.js", HTTP_GET, [](AsyncWebServerRequest * request) {
@@ -905,15 +914,13 @@ void showIP() {
     lcd.clear();
     lcd.setCursor(4, 1);
     lcd.print("IP do M.G.E:");
-    lcd.setCursor(4, 2);
-    lcd.print(WiFi.localIP());
+    printCenter(String(WiFi.localIP().toString().c_str()), 2);
   }
   if(opMode == 0){
     lcd.clear();
     lcd.setCursor(4, 1);
     lcd.print("IP do M.G.E:");
-    lcd.setCursor(4, 2);
-    lcd.print(WiFi.softAPIP());
+    printCenter(String(WiFi.softAPIP().toString().c_str()), 2);
   }
 }
 
@@ -1016,14 +1023,7 @@ void printCenter(String text, int line){ // Envia o texto centralizado para o di
 }
 
 void relatorio(){
-  if(intervalo == 0){
-    intervalo = 5;
-  }
-  int NT = (86400/intervalo)*D; // NT = Número total de registros; D = dias de registro
-  // int NT = 10000;
-  // intervalo = 5000;
-
-  if(millis() - storeCons >= intervalo*1000){
+  if(millis() - storeCons >= 20000){
     cmg.writeFile("/consumo.txt", String(conskw).c_str());
     if(writeCicle <= NT){
       //Relatório simples
@@ -1047,7 +1047,7 @@ void relatorio(){
 
       //Relatório CSV
       if(writeCicle == 0){
-        relatorioCSV = "\ndata/hora,tensao(V),correnteF1(A),correnteF2(A),potencia(W),consumo(kWh)\n";
+        relatorioCSV = "data/hora,tensao(V),correnteF1(A),correnteF2(A),potencia(W),consumo(kWh)\n";
         relatorioCSV += String(timeStamp());
       }else{
         relatorioCSV = String(timeStamp());
